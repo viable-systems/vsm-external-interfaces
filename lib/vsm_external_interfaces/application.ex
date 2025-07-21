@@ -4,6 +4,7 @@ defmodule VsmExternalInterfaces.Application do
   @moduledoc false
 
   use Application
+  require Logger
 
   @impl true
   def start(_type, _args) do
@@ -33,8 +34,8 @@ defmodule VsmExternalInterfaces.Application do
        server: true,
        pubsub_server: VsmExternalInterfaces.PubSub},
       
-      # gRPC adapter server
-      {VsmExternalInterfaces.Adapters.GRPC.Server, port: grpc_port}
+      # gRPC adapter server (commented out due to configuration issues)
+      # {VsmExternalInterfaces.Adapters.GRPC.Server, port: grpc_port}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

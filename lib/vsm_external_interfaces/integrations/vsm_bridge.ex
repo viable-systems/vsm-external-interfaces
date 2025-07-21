@@ -12,8 +12,21 @@ defmodule VsmExternalInterfaces.Integrations.VsmBridge do
   
   use GenServer
   
-  alias VsmCore.{System, Message, Event}
-  alias VsmConnections.ConnectionManager
+  # Mock structs for development without VSM core
+  defmodule Message do
+    @enforce_keys [:id, :type]
+    defstruct [:id, :type, :from, :to, :channel, :payload, :timestamp, :correlation_id, :metadata]
+  end
+  
+  defmodule System do
+    @enforce_keys [:id, :name]
+    defstruct [:id, :name, :status, :metadata]
+  end
+  
+  defmodule Event do
+    @enforce_keys [:type, :source, :timestamp]
+    defstruct [:id, :type, :source, :payload, :timestamp, :metadata]
+  end
   
   require Logger
   
@@ -461,6 +474,6 @@ defmodule VsmExternalInterfaces.Integrations.VsmBridge do
   end
   
   defp generate_alert_id do
-    "alert_#{:rand.uniform(1_000_000)}_#{System.os_time(:microsecond)}"
+    "alert_#{:rand.uniform(1_000_000)}_#{:os.system_time(:microsecond)}"
   end
 end

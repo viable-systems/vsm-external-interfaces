@@ -9,7 +9,11 @@ defmodule VsmExternalInterfaces.Translators.JsonTranslator do
   Supports automatic format detection and validation.
   """
   
-  alias VsmCore.Message
+  # Mock Message struct for development
+  defmodule Message do
+    @enforce_keys [:id, :type]
+    defstruct [:id, :type, :from, :to, :channel, :payload, :timestamp, :correlation_id, :metadata]
+  end
   
   @doc """
   Converts a JSON map to a VSM message struct.

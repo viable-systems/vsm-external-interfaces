@@ -308,10 +308,18 @@ defmodule VsmExternalInterfaces.Adapters.GRPC.Server do
     port = Keyword.get(opts, :port, 50051)
     
     # Start the gRPC server
-    {:ok, _server} = GRPC.Server.start([VsmExternalInterfaces.Adapters.GRPC], port)
-    
-    Logger.info("gRPC server started on port #{port}")
-    
-    {:ok, %{port: port}}
+    case GRPC.Server.start([VsmExternalInterfaces.Adapters.GRPC], port) do
+      {:ok, _server} ->
+        Logger.info("gRPC server started on port #{port}")
+        {:ok, %{port: port}}
+      
+      {:ok, _server, _port} ->
+        Logger.info("gRPC server started on port #{port}")
+        {:ok, %{port: port}}
+      
+      error ->
+        Logger.error("Failed to start gRPC server: #{inspect(error)}")
+        {:stop, error}
+    end
   end
 end
