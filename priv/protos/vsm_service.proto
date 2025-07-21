@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+package vsm_service;
+
+// VSM gRPC service definition
+service VsmService {
+  // Unary RPC for getting system information
+  rpc GetSystem(SystemRequest) returns (SystemResponse);
+  
+  // Unary RPC for sending messages
+  rpc SendMessage(MessageRequest) returns (MessageResponse);
+  
+  // Server streaming RPC for event subscriptions
+  rpc StreamEvents(EventStreamRequest) returns (stream Event);
+  
+  // Client streaming RPC for batch message sending
+  rpc BatchSendMessages(stream MessageRequest) returns (BatchResponse);
+  
+  // Bidirectional streaming RPC for interactive sessions
+  rpc InteractiveSession(stream InteractiveRequest) returns (stream InteractiveResponse);
+}
+
+// Request/Response messages
+
+message SystemRequest {
+  string system_id = 1;
+}
+
+message SystemResponse {
+  string system_id = 1;
+  string name = 2;
+  string status = 3;
+  repeated Metadata metadata = 4;
+}
+
+message MessageRequest {
+  string system_id = 1;
+  string type = 2;
+  string channel = 3;
+  oneof payload_type {
+    string json = 4;
+    bytes binary = 5;
+  }
+  string from = 6;
+  string to = 7;
+  string correlation_id = 8;
+}
+
+message MessageResponse {
+  string message_id = 1;
+  string status = 2;
+  int64 timestamp = 3;
+}
+
+message EventStreamRequest {
+  string system_id = 1;
+  repeated string event_types = 2;
+  bool include_metadata = 3;
+}
+
+message Event {
+  string type = 1;
+  string payload = 2;
+  int64 timestamp = 3;
+  string source = 4;
+  repeated Metadata metadata = 5;
+}
+
+message BatchResponse {
+  int32 total = 1;
+  int32 successful = 2;
+  int32 failed = 3;
+  repeated BatchResult results = 4;
+}
+
+message BatchResult {
+  bool success = 1;
+  string message_id = 2;
+  string error = 3;
+  int64 timestamp = 4;
+}
+
+message InteractiveRequest {
+  string type = 1;
+  string payload = 2;
+  string session_id = 3;
+}
+
+message InteractiveResponse {
+  string type = 1;
+  string payload = 2;
+  string session_id = 3;
+  int64 timestamp = 4;
+}
+
+message Metadata {
+  string key = 1;
+  string value = 2;
+}
