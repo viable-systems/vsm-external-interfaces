@@ -35,9 +35,9 @@ defmodule VsmExternalInterfaces.MixProject do
       {:grpc, "~> 0.7"},
       {:protobuf, "~> 0.11"},
       
-      # VSM core integration (mock for development)
-      # {:vsm_core, path: "../vsm-core"},
-      # {:vsm_connections, path: "../vsm-connections"},
+      # VSM core integration
+      {:vsm_core, path: "../vsm-core"},
+      {:vsm_connections, path: "../vsm-connections"},
       
       # Utilities
       {:telemetry, "~> 1.2"},
