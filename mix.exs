@@ -21,7 +21,7 @@ defmodule VsmExternalInterfaces.MixProject do
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
-    [
+    base_deps = [
       # HTTP REST adapter
       {:plug, "~> 1.15"},
       {:plug_cowboy, "~> 2.6"},
@@ -35,20 +35,38 @@ defmodule VsmExternalInterfaces.MixProject do
       {:grpc, "~> 0.7"},
       {:protobuf, "~> 0.11"},
       
-      # VSM core integration
-      {:vsm_core, path: "../vsm-core"},
-      {:vsm_connections, path: "../vsm-connections"},
-      
-      # Optional VSM integrations
-      {:vsm_telemetry, path: "../vsm-telemetry", optional: true},
-      {:vsm_goldrush, path: "../vsm-goldrush", optional: true},
-      
       # Utilities
       {:telemetry, "~> 1.2"},
-      {:telemetry_metrics, "~> 0.6"},
+      {:telemetry_metrics, "~> 1.0"},
       {:ex_doc, "~> 0.31", only: :dev, runtime: false},
       {:stream_data, "~> 0.6", only: [:dev, :test]},
       {:benchee, "~> 1.3", only: :bench}
     ]
+    
+    vsm_deps = if in_umbrella?() do
+      [
+        {:vsm_core, in_umbrella: true},
+        {:vsm_connections, in_umbrella: true},
+        {:vsm_telemetry, in_umbrella: true, optional: true},
+        {:vsm_goldrush, in_umbrella: true, optional: true}
+      ]
+    else
+      [
+        {:vsm_core, path: "../vsm-core"},
+        {:vsm_connections, path: "../vsm-connections"},
+        {:vsm_telemetry, path: "../vsm-telemetry", optional: true},
+        {:vsm_goldrush, path: "../vsm-goldrush", optional: true}
+      ]
+    end
+    
+    base_deps ++ vsm_deps
+  end
+  
+  defp in_umbrella? do
+    # Check if we're being compiled as part of an umbrella project
+    case System.get_env("MIX_BUILD_PATH") do
+      nil -> false
+      path -> String.contains?(path, "_build/#{Mix.env()}/lib")
+    end
   end
 end

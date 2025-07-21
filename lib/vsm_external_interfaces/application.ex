@@ -59,11 +59,11 @@ defmodule VsmExternalInterfaces.Application do
   end
   
   defp maybe_start_telemetry do
-    if Code.ensure_loaded?(VsmTelemetry) do
-      {VsmTelemetry.Supervisor, [
+    if Code.ensure_loaded?(VSMTelemetry) do
+      {VSMTelemetry.Supervisor, [
         metrics: vsm_metrics(),
         reporters: [
-          {VsmTelemetry.Reporters.Console, interval: 60_000}
+          {VSMTelemetry.Reporters.Console, interval: 60_000}
         ]
       ]}
     else
@@ -74,28 +74,28 @@ defmodule VsmExternalInterfaces.Application do
   defp vsm_metrics do
     [
       # HTTP adapter metrics
-      VsmTelemetry.Metrics.counter("vsm_external_interfaces.http.message_sent.count"),
-      VsmTelemetry.Metrics.summary("vsm_external_interfaces.http.request.duration"),
+      VSMTelemetry.Metrics.counter("vsm_external_interfaces.http.message_sent.count"),
+      VSMTelemetry.Metrics.summary("vsm_external_interfaces.http.request.duration"),
       
       # WebSocket adapter metrics
-      VsmTelemetry.Metrics.counter("vsm_external_interfaces.websocket.message_sent.count"),
-      VsmTelemetry.Metrics.gauge("vsm_external_interfaces.websocket.connections.active"),
+      VSMTelemetry.Metrics.counter("vsm_external_interfaces.websocket.message_sent.count"),
+      VSMTelemetry.Metrics.gauge("vsm_external_interfaces.websocket.connections.active"),
       
       # gRPC adapter metrics
-      VsmTelemetry.Metrics.counter("vsm_external_interfaces.grpc.message_sent.count"),
-      VsmTelemetry.Metrics.summary("vsm_external_interfaces.grpc.stream.duration"),
+      VSMTelemetry.Metrics.counter("vsm_external_interfaces.grpc.message_sent.count"),
+      VSMTelemetry.Metrics.summary("vsm_external_interfaces.grpc.stream.duration"),
       
       # VSM Bridge metrics
-      VsmTelemetry.Metrics.counter("vsm_bridge.message_sent.count", tags: [:system_id, :channel]),
-      VsmTelemetry.Metrics.counter("vsm_bridge.algedonic_triggered.count", tags: [:severity]),
+      VSMTelemetry.Metrics.counter("vsm_bridge.message_sent.count", tags: [:system_id, :channel]),
+      VSMTelemetry.Metrics.counter("vsm_bridge.algedonic_triggered.count", tags: [:severity]),
       
       # System health metrics
-      VsmTelemetry.Metrics.gauge("vsm_external_interfaces.adapters.health", tags: [:adapter])
+      VSMTelemetry.Metrics.gauge("vsm_external_interfaces.adapters.health", tags: [:adapter])
     ]
   end
   
   defp maybe_start_goldrush do
-    if Code.ensure_loaded?(VsmGoldrush) do
+    if Code.ensure_loaded?(VSMGoldrush) do
       VsmExternalInterfaces.GoldrushIntegration
     else
       []

@@ -9,7 +9,7 @@ defmodule VsmExternalInterfaces.Translators.JsonTranslator do
   Supports automatic format detection and validation.
   """
   
-  alias VsmCore.Message
+  alias VSMCore.Shared.Message
   
   @doc """
   Converts a JSON map to a VSM message struct.
@@ -18,17 +18,20 @@ defmodule VsmExternalInterfaces.Translators.JsonTranslator do
     with :ok <- validate_json_message(json_data),
          {:ok, vsm_data} <- transform_to_vsm(json_data) do
       
-      message = %Message{
-        id: vsm_data[:id] || generate_message_id(),
-        type: String.to_atom(vsm_data.type),
-        from: vsm_data[:from] || "external",
-        to: vsm_data.to,
-        channel: parse_channel(vsm_data[:channel] || "temporal"),
-        payload: vsm_data.payload,
-        timestamp: vsm_data[:timestamp] || DateTime.utc_now(),
-        correlation_id: vsm_data[:correlation_id],
-        metadata: build_metadata(json_data)
-      }
+      # VSMCore.Shared.Message.new requires specific parameters
+      message = Message.new(
+        vsm_data[:from] || "external",
+        vsm_data.to,
+        parse_channel(vsm_data[:channel] || "temporal"),
+        String.to_atom(vsm_data.type),
+        vsm_data.payload,
+        [
+          id: vsm_data[:id] || generate_message_id(),
+          timestamp: vsm_data[:timestamp] || DateTime.utc_now(),
+          correlation_id: vsm_data[:correlation_id],
+          metadata: build_metadata(json_data)
+        ]
+      )
       
       {:ok, message}
     end
@@ -37,7 +40,7 @@ defmodule VsmExternalInterfaces.Translators.JsonTranslator do
   @doc """
   Converts a VSM message to a JSON-serializable map.
   """
-  def from_vsm_message(%Message{} = message) do
+  def from_vsm_message(%VSMCore.Shared.Message{} = message) do
     json_data = %{
       id: message.id,
       type: Atom.to_string(message.type),
@@ -131,17 +134,26 @@ defmodule VsmExternalInterfaces.Translators.JsonTranslator do
   
   defp parse_channel(channel) when is_binary(channel) do
     case channel do
-      "temporal" -> :temporal
-      "algedonic" -> :algedonic
-      "command" -> :command
-      "coordination" -> :coordination
-      "resource" -> :resource_bargain
-      _ -> :temporal
+      "temporal" -> :coordination_channel  # Map temporal to coordination
+      "algedonic" -> :algedonic_channel
+      "command" -> :command_channel
+      "coordination" -> :coordination_channel
+      "resource" -> :resource_bargain_channel
+      "audit" -> :audit_channel
+      _ -> :coordination_channel  # Default to coordination channel
     end
   end
   
-  defp parse_channel(channel) when is_atom(channel), do: channel
-  defp parse_channel(_), do: :temporal
+  defp parse_channel(channel) when is_atom(channel) do
+    # Ensure atom is a valid channel type
+    if channel in [:command_channel, :coordination_channel, :audit_channel, 
+                   :algedonic_channel, :resource_bargain_channel] do
+      channel
+    else
+      :coordination_channel
+    end
+  end
+  defp parse_channel(_), do: :coordination_channel
   
   defp parse_timestamp(nil), do: DateTime.utc_now()
   defp parse_timestamp(timestamp) when is_binary(timestamp) do

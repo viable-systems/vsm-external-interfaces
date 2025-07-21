@@ -12,8 +12,9 @@ defmodule VsmExternalInterfaces.Integrations.VsmBridge do
   
   use GenServer
   
-  alias VsmCore.{System, Message, Event}
-  alias VsmConnections.ConnectionManager
+  alias VSMCore.Shared.Message
+  # Note: System and Event modules don't exist in VSMCore
+  # ConnectionManager should be VSMConnections
   
   require Logger
   
@@ -430,21 +431,21 @@ defmodule VsmExternalInterfaces.Integrations.VsmBridge do
   end
   
   defp discover_systems(_connection) do
-    # Mock system discovery
+    # Mock system discovery - using maps instead of System struct which doesn't exist
     systems = [
-      %System{
+      %{
         id: "manufacturing_plant_1",
         name: "Manufacturing Plant 1",
         status: :active,
         metadata: %{location: "Factory A", capacity: 1000}
       },
-      %System{
+      %{
         id: "supply_chain_1", 
         name: "Supply Chain System",
         status: :active,
         metadata: %{regions: ["North", "South"], suppliers: 25}
       },
-      %System{
+      %{
         id: "logistics_1",
         name: "Logistics Network",
         status: :active,
