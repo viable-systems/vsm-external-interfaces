@@ -39,6 +39,10 @@ defmodule VsmExternalInterfaces.MixProject do
       {:vsm_core, path: "../vsm-core"},
       {:vsm_connections, path: "../vsm-connections"},
       
+      # Optional VSM integrations
+      {:vsm_telemetry, path: "../vsm-telemetry", optional: true},
+      {:vsm_goldrush, path: "../vsm-goldrush", optional: true},
+      
       # Utilities
       {:telemetry, "~> 1.2"},
       {:telemetry_metrics, "~> 0.6"},
