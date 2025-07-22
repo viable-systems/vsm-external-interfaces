@@ -5,7 +5,7 @@ defmodule VsmExternalInterfaces.MixProject do
     [
       app: :vsm_external_interfaces,
       version: "0.1.0",
-      elixir: "~> 1.18",
+      elixir: "~> 1.17",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
@@ -44,12 +44,8 @@ defmodule VsmExternalInterfaces.MixProject do
     ]
     
     vsm_deps = if in_umbrella?() do
-      [
-        {:vsm_core, in_umbrella: true},
-        {:vsm_connections, in_umbrella: true},
-        {:vsm_telemetry, in_umbrella: true, optional: true},
-        {:vsm_goldrush, in_umbrella: true, optional: true}
-      ]
+      # In umbrella mode, dependencies are managed by the umbrella project
+      []
     else
       [
         {:vsm_core, path: "../vsm-core"},
@@ -63,10 +59,6 @@ defmodule VsmExternalInterfaces.MixProject do
   end
   
   defp in_umbrella? do
-    # Check if we're being compiled as part of an umbrella project
-    case System.get_env("MIX_BUILD_PATH") do
-      nil -> false
-      path -> String.contains?(path, "_build/#{Mix.env()}/lib")
-    end
+    Mix.Project.umbrella?()
   end
 end

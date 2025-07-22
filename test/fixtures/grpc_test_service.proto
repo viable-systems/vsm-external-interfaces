@@ -1,0 +1,109 @@
+syntax = "proto3";
+
+package vsm.test;
+
+option elixir_module_prefix = "VsmTest";
+
+// Test service for gRPC adapter testing
+service TestService {
+  // Unary call
+  rpc Echo(EchoRequest) returns (EchoResponse);
+  
+  // Server streaming
+  rpc ListItems(ListRequest) returns (stream Item);
+  
+  // Client streaming
+  rpc CollectItems(stream Item) returns (CollectResponse);
+  
+  // Bidirectional streaming
+  rpc Chat(stream ChatMessage) returns (stream ChatMessage);
+  
+  // Error testing
+  rpc FailingMethod(Empty) returns (Empty);
+  
+  // Timeout testing
+  rpc SlowMethod(DelayRequest) returns (Empty);
+}
+
+// Messages
+message Empty {}
+
+message EchoRequest {
+  string message = 1;
+  map<string, string> metadata = 2;
+}
+
+message EchoResponse {
+  string message = 1;
+  map<string, string> metadata = 2;
+  int64 timestamp = 3;
+}
+
+message ListRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+  string filter = 3;
+}
+
+message Item {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  map<string, string> attributes = 4;
+}
+
+message CollectResponse {
+  int32 count = 1;
+  repeated string ids = 2;
+}
+
+message ChatMessage {
+  string id = 1;
+  string user = 2;
+  string text = 3;
+  int64 timestamp = 4;
+}
+
+message DelayRequest {
+  int32 milliseconds = 1;
+}
+
+// Benchmark service
+service BenchmarkService {
+  rpc Echo(BenchmarkRequest) returns (BenchmarkResponse);
+  rpc StreamData(StreamRequest) returns (stream DataChunk);
+  rpc CollectData(stream DataChunk) returns (SummaryResponse);
+  rpc BidirectionalExchange(stream DataPacket) returns (stream DataPacket);
+}
+
+message BenchmarkRequest {
+  bytes data = 1;
+  int32 response_size = 2;
+}
+
+message BenchmarkResponse {
+  bytes data = 1;
+  int64 process_time_us = 2;
+}
+
+message StreamRequest {
+  int32 chunk_count = 1;
+  int32 chunk_size = 2;
+}
+
+message DataChunk {
+  int32 sequence = 1;
+  bytes data = 2;
+}
+
+message DataPacket {
+  string id = 1;
+  bytes payload = 2;
+  int64 timestamp = 3;
+}
+
+message SummaryResponse {
+  int32 total_chunks = 1;
+  int64 total_bytes = 2;
+  int64 duration_ms = 3;
+}

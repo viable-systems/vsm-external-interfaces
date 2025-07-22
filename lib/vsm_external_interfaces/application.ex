@@ -13,15 +13,9 @@ defmodule VsmExternalInterfaces.Application do
     websocket_port = System.get_env("WS_PORT", "4001") |> String.to_integer()
     grpc_port = System.get_env("GRPC_PORT", "50051") |> String.to_integer()
     
-    children = [
+    base_children = [
       # Start the Telemetry supervisor
       {Phoenix.PubSub, name: VsmExternalInterfaces.PubSub},
-      
-      # VSM Telemetry integration (if available)
-      maybe_start_telemetry(),
-      
-      # VSM Goldrush integration for pattern matching (if available)
-      maybe_start_goldrush(),
       
       # VSM Bridge - connects to VSM core
       {VsmExternalInterfaces.Integrations.VsmBridge, 
@@ -38,11 +32,19 @@ defmodule VsmExternalInterfaces.Application do
       {VsmExternalInterfaces.Adapters.WebSocket,
        http: [port: websocket_port],
        server: true,
-       pubsub_server: VsmExternalInterfaces.PubSub},
+       pubsub_server: VsmExternalInterfaces.PubSub}
       
       # gRPC adapter server (commented out due to configuration issues)
       # {VsmExternalInterfaces.Adapters.GRPC.Server, port: grpc_port}
     ]
+    
+    # Add optional children only if they are valid
+    optional_children = [
+      maybe_start_telemetry(),
+      maybe_start_goldrush()
+    ] |> Enum.filter(&(&1 != []))
+    
+    children = base_children ++ optional_children
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
